@@ -139,6 +139,8 @@ function S4() {
         "1A9": ["stroke_rate", "S"],
         "140": ["stroke_count", "D"],
         "088": ["watts", "D"],
+        "148": ["speed_cm_s", "D"],
+        "055": ["total_distance_meters", "D"],
         "1A0": ["heart_rate", "D"]
     };
 
@@ -326,13 +328,20 @@ S4.prototype.stopRower = function() {
 S4.prototype.fakeRower = function(callback) {
   console.log("[Init] Faking test data");
   var stroke_count = 0;
+  var dist = 0;
   var id = 0;
   var test = function() {
     var bpm = Math.floor(Math.random() * 10 + 120);
     callback({'heart_rate': bpm});
-    var watts = Math.floor(Math.random() * 10 + 120);
+    dist += 1;
     stroke_count = stroke_count + 1;
-    callback({'watts': watts, 'rev_count': stroke_count});
+    callback({
+      'watts': Math.floor(Math.random() * 10 + 120),
+      'rev_count': stroke_count,
+      'stroke_rate': Math.floor(Math.random() * 5 + 22),
+      'speed_cm_s': Math.floor(Math.random() * 50 + 360),
+      'total_distance_meters': dist
+    });
     setTimeout(test, 666);
   };
   test();
