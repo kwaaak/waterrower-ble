@@ -4,7 +4,7 @@
   "description": "A Cycling Power Bluetooth LE Service for the WaterRower S4",
   "main": "main.js",
   "license": "MIT",
-  "repository": "olympum/waterrower-ble",
+  "repository": "hcrohland/waterrower-ble",
   "engines": {
     "node": ">=0.10"
   },
@@ -17,7 +17,7 @@
     "url" : "https://github.com/olympum"
   },
   "dependencies": {
-    "ble-cycling-power": "olympum/ble-cycling-power",
+    "ble-cycling-power": "hcrohland/ble-cycling-power",
     "serialport": "2.0.5",
     "usb": "1.1.1",
     "debug": ">=2.2.0",
