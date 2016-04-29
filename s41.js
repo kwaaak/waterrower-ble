@@ -35,13 +35,21 @@ Byte 1 Heart Rate Value (40-240)
 function S41() {
   var self = this;
   self.port = null;
+  self.last_notify = 0;
   self.next = 'CMD';
   self.e = {
-    'distance_dm': 0,
+    'stroke_rate': 0,
+    'speed_cm_s': 0,
+    'distance_dm': 10,
     'stroke_count': 0
   };
 
   this.readAndDispatch = function (data) {
+    function notify (event) {
+      self.last_notify = Date.now();
+      self.event.notify(self.e);
+    }
+    
     debug('[IN]: ' + data.toString('hex'));
     for (var c of data) {
       var current = self.next;
@@ -75,18 +83,17 @@ function S41() {
 	self.e[current] = c * 10;
 	self.next = 'CMD';
 	debug ('found ' + current + ' of ' + c + ', now sending ' + JSON.stringify(self.e));	
-	debug ('Sending event '+ JSON.stringify(self.e));
-	self.event.notify(self.e);
+	notify(self.e);
 	break;
       case 'BPM':
 	self.next = 'CMD';
 	break;
       case 'distance_dm':
 	self.e[current] += c;
-	if (c === 0) {
+	if (c === 0 || Date.now() - self.last_notify > 5000) {
 	  self.e['stroke_rate'] = 0;
 	  self.e['speed_cm_s'] = 0;
-	  self.event.notify(self.e);
+	  notify(self.e);
 	}
 	  
 	self.next = 'CMD';
