@@ -90,7 +90,7 @@ function S41() {
 	break;
       case 'distance_dm':
 	self.e[current] += c;
-	if (c === 0 || Date.now() - self.last_notify > 5000) {
+	if (c === 0 || Date.now() - self.last_notify > 10000) {
 	  self.e['stroke_rate'] = 0;
 	  self.e['speed_cm_s'] = 0;
 	  notify(self.e);
