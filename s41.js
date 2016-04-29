@@ -32,12 +32,13 @@ Byte 1 Heart Rate Value (40-240)
 
 */
 
-function S4() {
+function S41() {
   var self = this;
   self.port = null;
   self.next = 'CMD';
   self.e = {
-    'distance_dm': 0
+    'distance_dm': 0,
+    'stroke_count': 0
   };
 
   this.readAndDispatch = function (data) {
@@ -51,13 +52,13 @@ function S4() {
 	  self.next = 'distance_dm';
           break;
 	case 0xff: // SPM and Speed
-	  self.next = 'strokes_per_min';
+	  self.next = 'stroke_rate';
           break;
 	case 0xfb: // HRM
-	  self.next = 'BPM';
+	  self.next = 'heart_rate';
           break;
 	case 0xfc: // stroke end
-	  self.strokes++;
+	  self.e['stroke_count'] += 1;
 	  self.prev_stroke = self.last_stroke;
 	  self.last_stroke = Date.now(); 
           break;
@@ -65,15 +66,16 @@ function S4() {
 	  debug ('Unkown command ' + c.toString(16));
 	}
 	break;
-      case 'strokes_per_min': //SPM
+      case 'stroke_rate': //SPM
 	self.e[current] = c;
-	self.next = 'speed_dm_s';
+	self.next = 'speed_cm_s';
 	debug ('found ' + current + ' of ' + c + ', now waiting for ' + self.next);	
 	break;
-      case 'speed_dm_s':
-	self.e[current] = c;
+      case 'speed_cm_s':
+	self.e[current] = c * 10;
 	self.next = 'CMD';
 	debug ('found ' + current + ' of ' + c + ', now sending ' + JSON.stringify(self.e));	
+	debug ('Sending event '+ JSON.stringify(self.e));
 	self.event.notify(self.e);
 	break;
       case 'BPM':
@@ -82,8 +84,8 @@ function S4() {
       case 'distance_dm':
 	self.e[current] += c;
 	if (c === 0) {
-	  self.e['strokes_per_min'] = 0;
-	  self.e['speed_dm_s'] = 0;
+	  self.e['stroke_rate'] = 0;
+	  self.e['speed_cm_s'] = 0;
 	  self.event.notify(self.e);
 	}
 	  
@@ -98,7 +100,7 @@ function S4() {
 }
 
 
-S4.prototype.open = function (comName) {
+S41.prototype.open = function (comName) {
     var self = this;
     var ready = $q.defer();
     var port = new com.SerialPort(comName, {
@@ -113,21 +115,21 @@ S4.prototype.open = function (comName) {
 
 };
 
-S4.prototype.start = function () {
+S41.prototype.start = function () {
     this.event = $q.defer();
     return this.event.promise;
 };
 
-S4.prototype.exit = function () {
+S41.prototype.exit = function () {
   if (this.event) {
     this.event.resolve("EXITED");
   }
 };
 
-S4.prototype.startRower = function(comName, callback) {
+S41.prototype.startRower = function(comName, callback) {
   var rower = this;
 
-  console.log("[Init] Opening WaterRower S4 on com port: " + comName);
+  console.log("[Init] Opening WaterRower S41 on com port: " + comName);
   rower.open(comName).then (
     function() {
       rower.start().then(
@@ -146,14 +148,14 @@ S4.prototype.startRower = function(comName, callback) {
   );
 };
 
-S4.prototype.stopRower = function() {
+S41.prototype.stopRower = function() {
   var self = this;
   return function() {
     self.exit();
   };
 };
 
-S4.prototype.fakeRower = function(callback) {
+S41.prototype.fakeRower = function(callback) {
   console.log("[Init] Faking test data");
   var stroke_count = 0;
   var dist = 0;
@@ -166,12 +168,13 @@ S4.prototype.fakeRower = function(callback) {
     stroke_count = stroke_count + 1;
     callback ({
       'distance_dm': dist,
-      'strokes_per_min': Math.floor(Math.random() * 5 + 22),
-      'speed_dm_s': Math.floor(Math.random() * 5 + 36)
+      'stroke_rate': Math.floor(Math.random() * 5 + 22),
+      'speed_cm_s': Math.floor(Math.random() * 50 + 360),
+      'stroke_count': stroke_count >> 2
     });
     setTimeout(test, 666);
   };
   test();
 };
 
-module.exports = S4
+module.exports = S41

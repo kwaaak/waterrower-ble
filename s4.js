@@ -140,7 +140,7 @@ function S4() {
         "140": ["stroke_count", "D"],
         "088": ["watts", "D"],
         "148": ["speed_cm_s", "D"],
-        "055": ["total_distance_meters", "D"],
+        "055": ["distance_meters", "D"],
         "1A0": ["heart_rate", "D"]
     };
 
@@ -199,6 +199,13 @@ function S4() {
         var end = 6 + 2 * l;
         var value = parseInt(string.substring(6, end), 16);
         var label = memoryMap[address][0];
+
+        //we want the distance in dm
+        if (label === "distance_meters") {
+	  label = "distance_dm";
+	  value *= 10;
+        }
+      
         var e = {};
         e[label] = value;
         if (self.event) {
@@ -300,7 +307,7 @@ S4.prototype.startRower = function(callback) {
               stroke_count= event.stroke_count;
               var e = {
                 'watts': watts,
-                'rev_count': stroke_count
+                'stroke_count': stroke_count
               };
               callback(e);
             } else if ('watts' in event) {
@@ -333,14 +340,14 @@ S4.prototype.fakeRower = function(callback) {
   var test = function() {
     var bpm = Math.floor(Math.random() * 10 + 120);
     callback({'heart_rate': bpm});
-    dist += 1;
+    dist += 10;
     stroke_count = stroke_count + 1;
     callback({
       'watts': Math.floor(Math.random() * 10 + 120),
-      'rev_count': stroke_count,
+      'stroke_count': stroke_count,
       'stroke_rate': Math.floor(Math.random() * 5 + 22),
       'speed_cm_s': Math.floor(Math.random() * 50 + 360),
-      'total_distance_meters': dist
+      'distance_dm': dist
     });
     setTimeout(test, 666);
   };
