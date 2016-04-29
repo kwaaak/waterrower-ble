@@ -4,7 +4,7 @@ var network = require('./network');
 var usb = require('./usb-peripheral');
 
 var mainBle = function(testMode) {
-  var ble = new peripheral.BluetoothPeripheral('WaterRower S4');
+  var ble = new peripheral.BluetoothPeripheral('WaterRower S4', ['./cycling-power-service','./hrm-service']);
 
   if (testMode) {
     var rower = new S4();
@@ -52,7 +52,7 @@ var main = function(args) {
     mainBle(testMode);
   } else {
     var bleNotify = function() {
-      var ble = new peripheral.BluetoothPeripheral('WaterRower S4');
+      var ble = new peripheral.BluetoothPeripheral('WaterRower S4', ['./cycling-power-service','./hrm-service']);
 
       return ble.notify;
 

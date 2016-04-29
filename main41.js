@@ -6,7 +6,7 @@ var main = function(args) {
   var device = args[2];
   var rower = new S4();
   var callback = function() {
-    var ble = new peripheral.BluetoothPeripheral('WaterRower S4.1', './RSC-service');
+    var ble = new peripheral.BluetoothPeripheral('WaterRower S4.1', ['./RSC-service']);
 
     return ble.notify;
 
