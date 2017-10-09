@@ -1,4 +1,8 @@
+[Unit]
+After=bluetooth.target
+
 [Service]
+ExecStartPre=/bin/hciconfig hci0 piscan
 ExecStart=/usr/local/bin/node main.js usb
 Restart=always
 StandardOutput=syslog
